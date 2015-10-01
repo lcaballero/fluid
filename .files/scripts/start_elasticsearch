@@ -1,0 +1,14 @@
+#!/bin/bash
+
+
+export ES_HEAP_SIZE=3g
+
+exec elasticsearch --config=$(pwd)/.files/elasticsearch.yml
+
+
+#  -Des.path.data=/tmp/es/data \
+#  -Des.path.home=$ES_HOME \
+#  -Des.path.logs=/tmp/es/logs \
+#  -Des.config=$(pwd)/.files/elasticsearch.yml
+
+

@@ -1,0 +1,26 @@
+#!/bin/bash
+
+
+rest=http://127.0.0.1:9200
+
+function pretty() {
+	curl "$rest/?pretty"
+}
+
+function _shutdown() {
+	curl -XPOST "$rest/_shutdown"
+}
+
+function match_all() {
+	curl -XGET "$rest/_count?pretty" -d '
+{
+  "query": {
+    "match_all": {}
+  }
+}
+'
+	
+}
+
+
+$1
