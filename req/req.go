@@ -2,124 +2,41 @@ package req
 
 import (
 	"bytes"
-	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"net/url"
 )
 
+// A Req is an internal structure used to make the http Client
+// and executing the http call.
 type Req struct {
-	Name        string
-	Description string
-
-	// Base (for GET)
-	Req *http.Request
-	Res *http.Response
-	err error
-
-	// For POST
-	Body *bytes.Buffer
-}
-
-func loopback() *url.URL {
-	u, err := url.Parse("http://127.0.0.1:80")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return u
-}
-
-// Request instance is remade because .NewRequest defaults a number of the
-// Request fields in preparation to make a network http call.
-func (r *Req) reMakeRequest() *Req {
-	r.Req, r.err = http.NewRequest(r.Req.Method, r.Req.URL.String(), r.Req.Body)
-	return r
-}
-
-func (r *Req) parseUrl(u string) *Req {
-	r.Req.URL, r.err = url.Parse(u)
-	return r
+	req *http.Request
+	errors *Errors
 }
 
 // Creates a default req with Request instance and byte buffer for body
 // reader/closer.
-func NewReq() *Req {
+func NewReq(r *http.Request) *Req {
 	return &Req{
-		Req: &http.Request{
-			Method: GET,
-			URL:    loopback(),
-		},
-		Body: bytes.NewBuffer([]byte{}),
+		req: r,
+		errors: &Errors{},
 	}
 }
 
-func (r *Req) Data(p string) *Req {
-	buf := bytes.NewBufferString(p)
-	cl := ioutil.NopCloser(buf)
-	r.Body = buf
-	r.Req.Body = cl
-	return r
-}
+// End() carries out the request and provides the response, with the
+// body read from the request, and any errors that occurred.
+func (r *Req) End() (*http.Response, *bytes.Buffer, *Errors) {
+	res, err := http.DefaultClient.Do(r.req)
 
-func (r *Req) Method(m string) *Req {
-	r.Req.Method = m
-	return r
-}
-
-func (r *Req) ParseUrl(u string) *Req {
-	return r.parseUrl(u)
-}
-
-func (r *Req) Url(u *url.URL) *Req {
-	r.Req.URL = u
-	return r
-}
-
-func (r *Req) HasError() bool {
-	return r.err != nil
-}
-
-func (r *Req) Do() *Req {
-	r.reMakeRequest()
-	if r.HasError() {
-		return r
+	r.errors.Add(err)
+	if r.errors.HasError() {
+		return nil, nil, r.errors
 	}
-	r.Res, r.err = http.DefaultClient.Do(r.Req)
-	if r.HasError() {
-		return r
+
+	body := bytes.NewBuffer([]byte{})
+
+	r.errors.Add(res.Write(body))
+	if r.errors.HasError() {
+		return nil, nil, r.errors
 	}
-	return r.ReadAll()
-}
 
-func (r *Req) Fatal() *Req {
-	if r.HasError() {
-		log.Fatal(r.Error())
-	}
-	return r
-}
-
-func (r *Req) Out() *Req {
-	if r.HasError() {
-		fmt.Println(r.err)
-	} else {
-		fmt.Println(r)
-	}
-	return r
-}
-
-func (r *Req) ReadAll() *Req {
-	r.err = r.Res.Write(r.Body)
-	if r.HasError() {
-		return r
-	}
-	return r
-}
-
-func (r *Req) Error() error {
-	return r.err
-}
-
-func (r *Req) String() string {
-	return r.Body.String()
+	return res, body, nil
 }

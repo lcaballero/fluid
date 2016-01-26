@@ -32,10 +32,4 @@ func TestRest(t *testing.T) {
 		s := NewRest().Get().OnLoopback(9200)
 		So(s.Url.Host, ShouldEqual, "127.0.0.1:9200")
 	})
-
-	Convey("Un-Ended Rest should not have a Req", t, func() {
-		s := NewRest().Get().OnLoopback(9200)
-		So(s.Req, ShouldBeNil)
-	})
-
 }

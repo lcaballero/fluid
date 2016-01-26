@@ -21,7 +21,3 @@ func (r *Rest) {{ . | title }}() *Rest {
     return r.Method({{ . }})
 }{{ end }}
 
-// Methods for Req state{{ range .methods }}
-func (r *Req) {{ . | title }}() *Req {
-    return r.Method({{ . }})
-}{{ end }}

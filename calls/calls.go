@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/lcaballero/fluid/req"
+	"github.com/lcaballero/fluid/shorthand"
 )
 
 const DEFAULT_REST = "http://127.0.0.1:9200"
@@ -19,37 +20,37 @@ func Rest(name string) *Calls {
 	}
 }
 
-func Pretty() *req.Req {
-	return req.NewRest().Name("pretty").OnLoopback(9200).Add("pretty", "").Get().ToReq()
+func Pretty() *req.Rest {
+	return req.NewRest().OnLoopback(9200).Add("pretty", "").Get()
 }
 
-func Shutdown() *req.Req {
-	return req.NewRest().Name("shutdown").OnLoopback(9200).Join("_shutdown").Post().ToReq()
+func Shutdown() *req.Rest {
+	return req.NewRest().OnLoopback(9200).Join("_shutdown").Post()
 }
 
-func Count() *req.Req {
-	return req.NewRest().Name("count").OnLoopback(9200).
-	Join("_count").Add("pretty", "").Get().Data(`
+func Count() *req.Rest {
+	return req.NewRest().OnLoopback(9200).
+		Join("_count").Add("pretty", "").Get().Data(`
 {
 	"query": {
 		"match_all": {}
 	}
 }
-`).ToReq()
+`)
 }
 
-func MatchAll() *req.Req {
-	return req.NewRest().Name("match all").OnLoopback(9200).
-	Join("_count").Add("pretty", "").Get().Data(`
+func MatchAll() *req.Rest {
+	return req.NewRest().OnLoopback(9200).
+		Join("_count").Add("pretty", "").Get().Data(`
 {
 	"query": {
 		"match_all": {}
 	}
 }
-`).ToReq()
+`)
 }
 
-func FindEmployee() *req.Req {
+func FindEmployee() *req.Rest {
 	q := `GET /megacorp/employee/%s`
 	id := "1"
 
@@ -58,14 +59,14 @@ func FindEmployee() *req.Req {
 	}
 
 	code := fmt.Sprintf(q, id)
-	r, err := req.Parse(code)
+	r, err := shorthand.Parse(code)
 	if err != nil {
 		fmt.Println(err)
 	}
-	return r.OnLoopback(9200).ToReq()
+	return r.OnLoopback(9200)
 }
 
-func PutEmployee() *req.Req {
+func PutEmployee() *req.Rest {
 	s := `PUT /megacorp/employee/%s
 {
 	"first_name": "John",
@@ -80,14 +81,14 @@ func PutEmployee() *req.Req {
 		id = os.Args[1]
 	}
 	code := fmt.Sprintf(s, id)
-	r, err := req.Parse(code)
+	r, err := shorthand.Parse(code)
 	if err != nil {
 		fmt.Println(err)
 	}
-	return r.OnLoopback(9200).ToReq()
+	return r.OnLoopback(9200)
 }
 
-func SearchAll() *req.Req {
+func SearchAll() *req.Rest {
 	s := `
 {
   "query": {
@@ -95,5 +96,5 @@ func SearchAll() *req.Req {
   }
 }
 `
-	return req.NewRest().OnLoopback(9200).Join("_search").Add("pretty", "").Get().Data(s).ToReq()
+	return req.NewRest().OnLoopback(9200).Join("_search").Add("pretty", "").Get().Data(s)
 }

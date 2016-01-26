@@ -7,18 +7,31 @@ import (
 	"net/http"
 
 	"github.com/lcaballero/fluid/calls"
+	"github.com/lcaballero/fluid/req"
 )
 
+func Simple() {
+	_, body, errs := req.NewRest().
+		Host("www.google.com", 80).
+		End()
+
+	if errs != nil {
+		fmt.Println(errs)
+	}
+
+	fmt.Println(body)
+}
+
 func Ex() {
-	calls.SearchAll().Do().Out()
+	calls.SearchAll().Out()
 }
 
 func All() {
-	calls.Pretty().Do().Out()
-	calls.Count().Do().Out()
-	calls.MatchAll().Do().Out()
-	calls.PutEmployee().Do().Out()
-	calls.FindEmployee().Do().Out()
+	calls.Pretty().Out()
+	calls.Count().Out()
+	calls.MatchAll().Out()
+	calls.PutEmployee().Out()
+	calls.FindEmployee().Out()
 }
 
 func BatchEmployee() {
