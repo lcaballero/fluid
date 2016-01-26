@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
 	"net/http"
 	"net/url"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestReq(t *testing.T) {

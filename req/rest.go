@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
-	"net/http"
-	"io/ioutil"
 )
 
 //go:generate genfront front --input req_rest_methods.fm --output req_rest_methods.gen.go
@@ -17,10 +17,10 @@ import (
 // A Rest instance is a builder for an http request.
 type Rest struct {
 	url.Values
-	Url         *url.URL
-	HttpMethod  string
-	Payload     []byte
-	ContentType string
+	Url          *url.URL
+	HttpMethod   string
+	Payload      []byte
+	ContentType  string
 	ContentLenth int64
 }
 
@@ -40,6 +40,7 @@ func NewRest() *Rest {
 		Values:      make(url.Values),
 		ContentType: "text/plain",
 		HttpMethod:  GET,
+		Payload: []byte{},
 		Url: &url.URL{
 			Scheme: Http,
 			Host:   DefaultUrl,
@@ -121,7 +122,6 @@ func (r *Rest) url() string {
 
 // ToReq builds out the final Req instance.
 func (r *Rest) End() (*http.Response, *bytes.Buffer, *Errors) {
-	r.Url.RawQuery = r.url()
 	return NewReq(r.NewRequest()).End()
 }
 
@@ -140,6 +140,9 @@ func (r *Rest) Out() {
 // resulting request URL.
 func (r *Rest) Join(p ...string) *Rest {
 	root := []string{r.Url.Path}
+	if r.Url.Path == "" {
+		root = []string{"/"}
+	}
 	root = append(root, p...)
 	r.Url.Path = filepath.Join(root...)
 	return r
@@ -158,12 +161,15 @@ func (r *Rest) Add(k, v string) *Rest {
 	return r
 }
 
+func (r *Rest) HasPayload() bool {
+	return r.Payload != nil && len(r.Payload) > 0
+}
+
 func (r *Rest) NewRequest() *http.Request {
-	var rc io.ReadCloser = nil
-	if r.ContentLenth > 0 {
-		buf := bytes.NewBuffer(r.Payload)
-		rc = ioutil.NopCloser(buf)
-	}
+	buf := bytes.NewBuffer(r.Payload)
+	rc := ioutil.NopCloser(buf)
+
+	r.Url.RawQuery = r.Values.Encode()
 	req := &http.Request{
 		Method:     r.HttpMethod,
 		URL:        r.Url,
@@ -174,6 +180,7 @@ func (r *Rest) NewRequest() *http.Request {
 		Body:       rc,
 		Host:       r.Url.Host,
 	}
+	req.Header.Add("Content-Type", r.ContentType)
 	if r.ContentLenth > 0 {
 		req.ContentLength = r.ContentLenth
 	}
