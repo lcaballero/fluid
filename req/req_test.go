@@ -1,9 +1,10 @@
 package req
-    
+
 import (
-	. "github.com/smartystreets/goconvey/convey"
-	"testing"
 	"fmt"
+	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestName(t *testing.T) {
@@ -33,5 +34,3 @@ func TestName(t *testing.T) {
 		So(r.Req, ShouldNotBeNil)
 	})
 }
-
-

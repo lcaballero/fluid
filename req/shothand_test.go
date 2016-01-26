@@ -1,9 +1,10 @@
 package req
 
 import (
-	. "github.com/smartystreets/goconvey/convey"
-	"testing"
 	"fmt"
+	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 var rawPath = "/_count"
@@ -18,14 +19,11 @@ var rawJson = `{
 }
 `
 
-
 func ex() string {
 	return fmt.Sprintf(template, GET, rawPath, rawJson)
 }
 
 func TestShorthand(t *testing.T) {
-
-	fmt.Println(ex())
 
 	Convey("short hand parse should find data payload", t, func() {
 		s := `PUT /megacorp/employee/%d

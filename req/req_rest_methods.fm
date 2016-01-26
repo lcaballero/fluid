@@ -9,25 +9,19 @@ methods:
   - TRACE
   - CONNECT
 ---
-package {{ENV.GOPACKAGE}}
-{{GEN_TAGLINE}}
+package {{ .GOPACKAGE }}
+{{ .GEN_TAGLINE }}
 
-const (
-{{#each methods}}
-    {{this}} = "{{this}}"
-{{/each}}
+const ({{ range .methods }}
+    {{ . }} = "{{ . }}"{{ end }}
 )
 
-// Methods for the Rest state
-{{#each methods}}
-func (r *Rest) {{toPascal this}}() *Rest {
-    return r.Method({{this}})
-}
-{{/each}}
+// Methods for the Rest state{{ range .methods }}
+func (r *Rest) {{ . | title }}() *Rest {
+    return r.Method({{ . }})
+}{{ end }}
 
-// Methods for Req state
-{{#each methods}}
-func (r *Req) {{toPascal this}}() *Req {
-    return r.Method({{this}})
-}
-{{/each}}
+// Methods for Req state{{ range .methods }}
+func (r *Req) {{ . | title }}() *Req {
+    return r.Method({{ . }})
+}{{ end }}

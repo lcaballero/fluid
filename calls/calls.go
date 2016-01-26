@@ -1,9 +1,10 @@
 package calls
 
 import (
-	"fluid/req"
 	"fmt"
 	"os"
+
+	"github.com/lcaballero/fluid/req"
 )
 
 const DEFAULT_REST = "http://127.0.0.1:9200"
@@ -19,16 +20,16 @@ func Rest(name string) *Calls {
 }
 
 func Pretty() *req.Req {
-	return req.NewRest("pretty").OnLoopback(9200).Add("pretty", "").Get().ToReq()
+	return req.NewRest().Name("pretty").OnLoopback(9200).Add("pretty", "").Get().ToReq()
 }
 
 func Shutdown() *req.Req {
-	return req.NewRest("shutdown").OnLoopback(9200).Path("_shutdown").Post().ToReq()
+	return req.NewRest().Name("shutdown").OnLoopback(9200).Join("_shutdown").Post().ToReq()
 }
 
 func Count() *req.Req {
-	return req.NewRest("count").OnLoopback(9200).
-	Path("_count").Add("pretty", "").Get().Data(`
+	return req.NewRest().Name("count").OnLoopback(9200).
+	Join("_count").Add("pretty", "").Get().Data(`
 {
 	"query": {
 		"match_all": {}
@@ -38,8 +39,8 @@ func Count() *req.Req {
 }
 
 func MatchAll() *req.Req {
-	return req.NewRest("match all").OnLoopback(9200).
-	Path("_count").Add("pretty", "").Get().Data(`
+	return req.NewRest().Name("match all").OnLoopback(9200).
+	Join("_count").Add("pretty", "").Get().Data(`
 {
 	"query": {
 		"match_all": {}
@@ -79,10 +80,20 @@ func PutEmployee() *req.Req {
 		id = os.Args[1]
 	}
 	code := fmt.Sprintf(s, id)
-	r,err := req.Parse(code)
+	r, err := req.Parse(code)
 	if err != nil {
 		fmt.Println(err)
 	}
 	return r.OnLoopback(9200).ToReq()
 }
 
+func SearchAll() *req.Req {
+	s := `
+{
+  "query": {
+    "match_all": {}
+  }
+}
+`
+	return req.NewRest().OnLoopback(9200).Join("_search").Add("pretty", "").Get().Data(s).ToReq()
+}

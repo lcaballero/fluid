@@ -1,48 +1,49 @@
 package req
 
 import (
-	"net/url"
+	"bytes"
 	"fmt"
+	"io"
+	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
-	"io"
-	"os"
-	"bytes"
 )
 
-//go:generate genfront --debug --input req_rest_methods.fm --output req_rest_methods.go
+//go:generate genfront front --input req_rest_methods.fm --output req_rest_methods.gen.go
 
 // A Rest structure holds data points used during any http request.  While
 // the interface for a Rest instance build up the URL, Method, Query, etc
 // for eventual resolution.
 type Rest struct {
 	url.Values
-	Name string
-	Url *url.URL
+	name       string
+	Url        *url.URL
 	HttpMethod string
-	Payload string
+	Payload    string
+	Req        *Req
 }
 
 const Https = "https"
 const Http = "http"
 const Loopback = "127.0.0.1"
 const HttpPort = 80
-const DefaultUrl = "http://127.0.0.1:80"
+const DefaultUrl = "127.0.0.1:80"
 
 func NewRest() *Rest {
 	return &Rest{
-		Values: make(url.Values),
+		Values:     make(url.Values),
 		HttpMethod: GET,
 		Url: &url.URL{
 			Scheme: Http,
-			Host: DefaultUrl,
+			Host:   DefaultUrl,
 		},
 	}
 }
 
 // Gives this Rest call a user-defined name.
 func (r *Rest) Name(name string) *Rest {
-	r.Name = name
+	r.name = name
 	return r
 }
 
@@ -63,11 +64,11 @@ func (r *Rest) Method(m string) *Rest {
 	return r
 }
 
-func (r *Rest) Show(w io.Writer) *Rest {
+func (r *Rest) Write(w io.Writer) *Rest {
 	if w == nil {
 		w = os.Stdout
 	}
-	fmt.Fprintln(os.Stdout, r)
+	fmt.Fprintln(w, r)
 	return r
 }
 
@@ -89,7 +90,7 @@ func (r *Rest) String() string {
 func (r *Rest) url() string {
 	q := strings.Replace(r.Url.String(), "=&", "&", -1)
 	if strings.HasSuffix(q, "=") {
-		q = q[0:len(q) - 1]
+		q = q[0 : len(q)-1]
 	}
 	return q
 }
@@ -99,7 +100,7 @@ func (r *Rest) ToReq() *Req {
 	return NewReq().Method(r.HttpMethod).Url(r.Url).Data(r.Payload)
 }
 
-func (r *Rest) Path(p ...string) *Rest {
+func (r *Rest) Join(p ...string) *Rest {
 	root := []string{r.Url.Path}
 	root = append(root, p...)
 	r.Url.Path = filepath.Join(root...)
@@ -110,8 +111,8 @@ func (r *Rest) Flag(k string) *Rest {
 	return r.Add(k, "")
 }
 
-func (r *Rest) Add(k,v string) *Rest {
-	r.Values.Add(k,v)
+func (r *Rest) Add(k, v string) *Rest {
+	r.Values.Add(k, v)
 	r.Url.RawQuery = r.Values.Encode()
 	return r
 }

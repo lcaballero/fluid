@@ -1,8 +1,9 @@
 package calls
-   
+
 import (
-	. "github.com/smartystreets/goconvey/convey"
 	"testing"
+
+	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestName(t *testing.T) {
@@ -13,5 +14,3 @@ func TestName(t *testing.T) {
 		So(r.Name, ShouldEqual, name)
 	})
 }
-
-

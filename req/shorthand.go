@@ -1,17 +1,16 @@
 package req
 
 import (
-	"strings"
-	"bytes"
 	"bufio"
+	"bytes"
 	"errors"
 	"io"
-	"fmt"
+	"strings"
 )
 
+type Shorthand struct{}
 
-type Shorthand struct {}
-var httpMethods = []string{ GET, HEAD, PUT, POST, INS, DEL, }
+var httpMethods = []string{GET, HEAD, PUT, POST, INS, DEL}
 
 func parseUrl(r *Rest, reader *bufio.Reader) (*Rest, error) {
 
@@ -27,8 +26,7 @@ func parseUrl(r *Rest, reader *bufio.Reader) (*Rest, error) {
 	}
 
 	method := ""
-	for _,m := range httpMethods {
-		fmt.Println(m, line)
+	for _, m := range httpMethods {
 		if strings.HasPrefix(line, m) {
 			method = m
 			break
@@ -63,7 +61,7 @@ func parsePayload(r *Rest, reader *bufio.Reader) (*Rest, error) {
 		}
 	}
 
-	if err != nil && err != io.EOF  {
+	if err != nil && err != io.EOF {
 		return nil, err
 	}
 
@@ -73,7 +71,7 @@ func parsePayload(r *Rest, reader *bufio.Reader) (*Rest, error) {
 }
 
 func Parse(sh string) (*Rest, error) {
-	r := NewRest("parsed")
+	r := NewRest().Name("parsed")
 	buf := bufio.NewReader(bytes.NewBufferString(sh))
 
 	r, err := parseUrl(r, buf)

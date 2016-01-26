@@ -1,16 +1,16 @@
 package req
 
 import (
-	"net/http"
 	"bytes"
-	"log"
-	"net/url"
 	"fmt"
 	"io/ioutil"
+	"log"
+	"net/http"
+	"net/url"
 )
 
 type Req struct {
-	Name string
+	Name        string
 	Description string
 
 	// Base (for GET)
@@ -48,7 +48,7 @@ func NewReq() *Req {
 	return &Req{
 		Req: &http.Request{
 			Method: GET,
-			URL: loopback(),
+			URL:    loopback(),
 		},
 		Body: bytes.NewBuffer([]byte{}),
 	}
@@ -81,7 +81,6 @@ func (r *Req) HasError() bool {
 }
 
 func (r *Req) Do() *Req {
-	//http.Post(url, bodyType, io.Reader)
 	r.reMakeRequest()
 	if r.HasError() {
 		return r
@@ -124,4 +123,3 @@ func (r *Req) Error() error {
 func (r *Req) String() string {
 	return r.Body.String()
 }
-

@@ -11,7 +11,7 @@ function _shutdown() {
 	curl -XPOST "$rest/_shutdown"
 }
 
-function match_all() {
+function count() {
 	curl -XGET "$rest/_count?pretty" -d '
 {
   "query": {
@@ -19,8 +19,26 @@ function match_all() {
   }
 }
 '
-	
 }
+
+function match_all() {
+	curl -XGET "$rest/bz1?pretty" -d '
+{
+  "match_all": {}
+}
+'
+}
+
+function search_all() {
+	curl -XGET "$rest/_search?pretty" -d '
+{
+  "query": {
+    "match_all": {}
+  }
+}
+'
+}
+
 
 
 $1

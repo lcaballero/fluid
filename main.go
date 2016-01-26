@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fluid/examples"
+	"github.com/lcaballero/fluid/examples"
 )
 
 func main() {
 	examples.Ex()
 }
-
